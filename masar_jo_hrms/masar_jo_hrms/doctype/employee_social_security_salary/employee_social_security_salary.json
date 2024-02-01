@@ -1,0 +1,215 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{posting_date}-{employee_name}",
+ "creation": "2024-01-21 12:08:10.400079",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date",
+  "employee",
+  "nationality",
+  "column_break_m70c",
+  "company",
+  "employee_name",
+  "national_number",
+  "personal_number",
+  "birth_date",
+  "social_security_info_section",
+  "social_security_joining_date",
+  "employee_share_rate",
+  "ss_emp_share_amount",
+  "amount",
+  "column_break_vaad",
+  "social_security_number",
+  "company_share_rate",
+  "ss_company_share_amount",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "employee.custom_nationality",
+   "fieldname": "nationality",
+   "fieldtype": "Read Only",
+   "label": "Nationality",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_m70c",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "MID Contracting",
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.employee",
+   "fieldname": "employee_name",
+   "fieldtype": "Read Only",
+   "label": "Employee Name"
+  },
+  {
+   "depends_on": "eval:doc.nationality==\"Jordan\"",
+   "fetch_from": "employee.custom_national_no",
+   "fieldname": "national_number",
+   "fieldtype": "Data",
+   "label": "National No.",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.nationality!=\"Jordan\"",
+   "fetch_from": "employee.custom_personal_no",
+   "fieldname": "personal_number",
+   "fieldtype": "Data",
+   "label": "Personal No.",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.date_of_birth",
+   "fieldname": "birth_date",
+   "fieldtype": "Read Only",
+   "label": "Birth Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "social_security_info_section",
+   "fieldtype": "Section Break",
+   "label": "Social Security Info"
+  },
+  {
+   "fetch_from": "employee.custom_social_security_date",
+   "fieldname": "social_security_joining_date",
+   "fieldtype": "Read Only",
+   "label": "Social Security Joining Date",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "company.custom_employee_share_rate",
+   "fieldname": "employee_share_rate",
+   "fieldtype": "Float",
+   "label": "Employee Share Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "ss_emp_share_amount",
+   "fieldtype": "Float",
+   "label": "Employee Share",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "column_break_vaad",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.custom_social_security_number",
+   "fieldname": "social_security_number",
+   "fieldtype": "Read Only",
+   "label": "Social Security No.",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "company.custom_company_share_rate",
+   "fieldname": "company_share_rate",
+   "fieldtype": "Float",
+   "label": "Company Share Rate",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ss_company_share_amount",
+   "fieldtype": "Float",
+   "label": "Company Share",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Employee Social Security Salary",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-01-22 07:52:13.936720",
+ "modified_by": "Administrator",
+ "module": "Masar Jo Hrms",
+ "name": "Employee Social Security Salary",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

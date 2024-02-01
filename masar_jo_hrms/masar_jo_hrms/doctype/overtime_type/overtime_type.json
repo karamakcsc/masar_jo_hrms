@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:overtime_type",
+ "creation": "2024-01-21 15:08:54.151247",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "overtime_type",
+  "rate",
+  "column_break_87ze",
+  "salary_component"
+ ],
+ "fields": [
+  {
+   "fieldname": "overtime_type",
+   "fieldtype": "Data",
+   "label": "Overtime Type",
+   "unique": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Float",
+   "label": "Hour Rate"
+  },
+  {
+   "fieldname": "column_break_87ze",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-21 17:36:49.125024",
+ "modified_by": "Administrator",
+ "module": "Masar Jo Hrms",
+ "name": "Overtime Type",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

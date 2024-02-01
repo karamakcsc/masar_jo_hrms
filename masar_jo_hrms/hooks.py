@@ -1,3 +1,5 @@
+from . import __version__ as app_version
+
 app_name = "masar_jo_hrms"
 app_title = "Masar Jo Hrms"
 app_publisher = "KCSC"
@@ -129,6 +131,14 @@ app_license = "mit"
 # 		"on_trash": "method"
 # 	}
 # }
+doctype_js = {
+   "Employee" : "custom/employee/employee.js",
+   "Salary Structure Assignment" : "custom/salary_structure_assignment/salary_structure_assignment.js",
+   "Salary Slip" : "custom/salary_slip/salary_slip.js",
+   ############## from mahmoud 
+   "Payroll Entry" : "custom/payroll_entry/payroll_entry.js", 
+ }
+
 
 # Scheduled Tasks
 # ---------------
@@ -220,10 +230,74 @@ app_license = "mit"
 # 	"masar_jo_hrms.auth.validate"
 # ]
 
+user_data_fields = [
+	{
+		"doctype": "{doctype_1}",
+		"filter_by": "{filter_by}",
+		"redact_fields": ["{field_1}", "{field_2}"],
+		"partial": 1,
+	},
+	{
+		"doctype": "{doctype_2}",
+		"filter_by": "{filter_by}",
+		"partial": 1,
+	},
+	{
+		"doctype": "{doctype_3}",
+		"strict": False,
+	},
+	{
+		"doctype": "{doctype_4}"
+	}
+]
+
 # Automatically update python controller files with type annotations for this app.
 # export_python_type_annotations = True
 
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
+
+###############
+##############
+##################
+###########################    New Hooks 
+
+
+fixtures = [
+    {"dt": "Custom Field", "filters": [
+        [
+            "name", "in", [ 
+            "Company-custom_social_security_liabilities",
+            "Company-custom_employee_share_rate" , 
+            "Company-custom_column_break_euvuw" , 
+            "Company-custom_social_security_expenses" , 
+            "Company-custom_company_share_rate" , 
+            "Company-custom_social_security_info" ,
+            "Company-custom_masar_hrms",
+            "Salary Component-custom_is_social_security_applicable" , 
+            "Salary Component-custom_is_overtime_applicable" ,  
+            "Employee-custom_is_overtime_applicable" , 
+            "Employee-custom_overtime_details" , 
+            "Employee-custom_social_security_amount" , 
+            "Employee-custom_social_security_salary" ,  
+            "Employee-custom_social_security_date" , 
+            "Employee-custom_tax_type" , 
+            "Employee-custom_employee_share_rate" , 
+            "Employee-custom_social_security_number" , 
+            "Employee-custom_is_social_security_applicable" , 
+            "Employee-custom_masar_hrms" , 
+            "Employee-custom_tab_10",
+            "Employee-custom_column_break_idzxg" 
+
+
+
+
+
+
+
+            ]
+        ]
+    ]}
+]
 
