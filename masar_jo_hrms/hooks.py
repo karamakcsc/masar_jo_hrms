@@ -288,9 +288,17 @@ fixtures = [
             "Employee-custom_is_social_security_applicable" , 
             "Employee-custom_masar_hrms" , 
             "Employee-custom_tab_10",
-            "Employee-custom_column_break_idzxg"
+            "Employee-custom_column_break_idzxg",
+            "Employee-custom_national_no",
+            "Employee-custom_nationality",
+            "Employee-custom_personal_no"
             ]
         ]
     ]}
 ]
 
+from masar_jo_hrms.override import _salary_slip
+from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
+
+SalarySlip.compute_taxable_earnings_for_year = _salary_slip.compute_taxable_earnings_for_year
+SalarySlip.calculate_variable_tax = _salary_slip.calculate_variable_tax
