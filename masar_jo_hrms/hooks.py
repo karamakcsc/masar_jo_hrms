@@ -288,12 +288,7 @@ fixtures = [
             "Employee-custom_is_social_security_applicable" , 
             "Employee-custom_masar_hrms" , 
             "Employee-custom_tab_10",
-            "Employee-custom_column_break_idzxg" 
-
-
-
-
-
+            "Employee-custom_column_break_idzxg"
 
 
             ]
