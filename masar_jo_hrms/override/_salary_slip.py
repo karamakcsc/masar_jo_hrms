@@ -133,94 +133,11 @@ def get_working_days_details(self, lwp=None, for_preview=0):
         
 ## Calculate 30 Days ###### END
 
-# def calculate_variable_tax(self, tax_component):
-# 			self.previous_total_paid_taxes = self.get_tax_paid_in_period(
-# 				self.payroll_period.start_date, self.start_date, tax_component
-# 			)
-
-# 			eval_locals, default_data = self.get_data_for_eval()
-# 			self.total_structured_tax_amount = calculate_tax_by_tax_slab(
-# 				self.total_taxable_earnings_without_full_tax_addl_components,
-# 				self.tax_slab,
-# 				self.whitelisted_globals,
-# 				eval_locals,
-# 			)
-			
-# 			self.current_structured_tax_amount = (
-# 			self.total_structured_tax_amount - self.previous_total_paid_taxes
-# 			) / self.remaining_sub_periods
-# 			self.full_tax_on_additional_earnings = 0.0
-# 			if self.current_additional_earnings_with_full_tax:
-# 				self.total_tax_amount = SalarySlip.calculate_tax_by_tax_slab(
-# 					self.total_taxable_earnings, self.tax_slab, self.whitelisted_globals, eval_locals
-# 				)
-# 				self.full_tax_on_additional_earnings = self.total_tax_amount - self.total_structured_tax_amount
-
-# 			current_tax_amount = self.current_structured_tax_amount + self.full_tax_on_additional_earnings
-# 			if flt(current_tax_amount) < 0:
-# 				current_tax_amount = 0
-
-
-# 			self._component_based_variable_tax[tax_component].update(
-# 				{
-# 					"previous_total_paid_taxes": self.previous_total_paid_taxes,
-# 					"total_structured_tax_amount": self.total_structured_tax_amount,
-# 					"current_structured_tax_amount": self.current_structured_tax_amount,
-# 					"full_tax_on_additional_earnings": self.full_tax_on_additional_earnings,
-# 					"current_tax_amount": current_tax_amount,
-# 				}
-# 			)
-            
-# 			return current_tax_amount
-
-# def compute_taxable_earnings_for_year(self):
-# 		# get taxable_earnings, opening_taxable_earning, paid_taxes for previous period
-# 		self.previous_taxable_earnings, exempted_amount = self.get_taxable_earnings_for_prev_period(
-# 			self.payroll_period.start_date, self.start_date, self.tax_slab.allow_tax_exemption
-# 		)
-
-# 		self.previous_taxable_earnings_before_exemption = (
-# 			self.previous_taxable_earnings + exempted_amount
-# 		)
-
-# 		self.compute_current_and_future_taxable_earnings()
-
-# 		# Deduct taxes forcefully for unsubmitted tax exemption proof and unclaimed benefits in the last period
-# 		if self.payroll_period.end_date <= getdate(self.end_date):
-# 			self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
-# 			self.deduct_tax_for_unclaimed_employee_benefits = 1
-
-# 		# Get taxable unclaimed benefits
-# 		self.unclaimed_taxable_benefits = 0
-# 		if self.deduct_tax_for_unclaimed_employee_benefits:
-# 			self.unclaimed_taxable_benefits = self.calculate_unclaimed_taxable_benefits()
-
-# 		# Total exemption amount based on tax exemption declaration
-# 		self.total_exemption_amount = self.get_total_exemption_amount()
-
-# 		# Employee Other Incomes
-# 		self.other_incomes = self.get_income_form_other_sources() or 0.0
-
-# 		# Total taxable earnings including additional and other incomes
-# 		self.total_taxable_earnings = (
-# 			self.previous_taxable_earnings
-# 			+ self.current_structured_taxable_earnings
-# 			+ self.future_structured_taxable_earnings
-# 			+ self.current_additional_earnings
-# 			# + self.other_incomes
-# 			# + self.unclaimed_taxable_benefits
-# 		) - self.total_exemption_amount
-	
-# 		# Total taxable earnings without additional earnings with full tax
-# 		self.total_taxable_earnings_without_full_tax_addl_components =(self.total_taxable_earnings )
-            
-
 def calculate_variable_tax(self, tax_component):
 			self.previous_total_paid_taxes = self.get_tax_paid_in_period(
 				self.payroll_period.start_date, self.start_date, tax_component
 			)
 
-			# Structured tax amount
 			eval_locals, default_data = self.get_data_for_eval()
 			self.total_structured_tax_amount = calculate_tax_by_tax_slab(
 				self.total_taxable_earnings_without_full_tax_addl_components,
@@ -228,15 +145,10 @@ def calculate_variable_tax(self, tax_component):
 				self.whitelisted_globals,
 				eval_locals,
 			)
-
-			self.current_structured_tax_amount =  self.total_structured_tax_amount / 12 #Yasser
-			# self.current_structured_tax_amount =  (
-			# self.total_structured_tax_amount
-			# #- self.previous_total_paid_taxes
-			# ) / 12
-			#/ self.remaining_sub_periods
-
-			# Total taxable earnings with additional earnings with full tax
+			
+			self.current_structured_tax_amount = (
+			self.total_structured_tax_amount - self.previous_total_paid_taxes
+			) / self.remaining_sub_periods
 			self.full_tax_on_additional_earnings = 0.0
 			if self.current_additional_earnings_with_full_tax:
 				self.total_tax_amount = SalarySlip.calculate_tax_by_tax_slab(
@@ -245,10 +157,9 @@ def calculate_variable_tax(self, tax_component):
 				self.full_tax_on_additional_earnings = self.total_tax_amount - self.total_structured_tax_amount
 
 			current_tax_amount = self.current_structured_tax_amount + self.full_tax_on_additional_earnings
-   			# if flt(current_tax_amount) < 0:
-			# 	current_tax_amount = 0
-			if flt(current_tax_amount) != 0:
-				current_tax_amount = current_tax_amount - 0.004
+			if flt(current_tax_amount) < 0:
+				current_tax_amount = 0
+
 
 			self._component_based_variable_tax[tax_component].update(
 				{
@@ -291,24 +202,16 @@ def compute_taxable_earnings_for_year(self):
 		self.other_incomes = self.get_income_form_other_sources() or 0.0
 
 		# Total taxable earnings including additional and other incomes
-		# if self.deduct_tax_for_unclaimed_employee_benefits == 0:
-			# self.total_taxable_earnings = (self.current_structured_taxable_earnings * 12) - self.total_exemption_amount # Yasser
-		# else:self.total_taxable_earnings = (self.gross_pay
-		self.total_taxable_earnings = (self.gross_pay
-			# self.previous_taxable_earnings
-			# + self.current_structured_taxable_earnings
-			# + self.future_structured_taxable_earnings
-			# + self.current_additional_earnings
+		self.total_taxable_earnings = (
+			self.previous_taxable_earnings
+			+ self.current_structured_taxable_earnings
+			+ self.future_structured_taxable_earnings
+			+ self.current_additional_earnings
 			# + self.other_incomes
 			# + self.unclaimed_taxable_benefits
-			* 12
 		) - self.total_exemption_amount
-		# frappe.msgprint(str(self.total_taxable_earnings))
-		# frappe.msgprint(str(self.current_additional_earnings_with_full_tax))
-		# frappe.msgprint(str(self.current_additional_earnings))
+	
 		# Total taxable earnings without additional earnings with full tax
-		self.total_taxable_earnings_without_full_tax_addl_components =(
-			self.total_taxable_earnings - self.current_additional_earnings_with_full_tax
-		# self.total_taxable_earnings_without_full_tax_addl_components =(
-		#     self.total_taxable_earnings
-		)
+		self.total_taxable_earnings_without_full_tax_addl_components =(self.total_taxable_earnings )
+            
+
