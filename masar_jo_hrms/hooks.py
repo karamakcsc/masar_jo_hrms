@@ -310,7 +310,7 @@ SalarySlip.calculate_tax_by_tax_slab = _salary_slip.calculate_tax_by_tax_slab
 
 from masar_jo_hrms.override import _salary_slip
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
-SalarySlip.get_working_days_details = _salary_slip.get_working_days_details
+# SalarySlip.get_working_days_details = _salary_slip.get_working_days_details
 
 
 
