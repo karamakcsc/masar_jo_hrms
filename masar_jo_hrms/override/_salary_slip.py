@@ -1,9 +1,92 @@
 import frappe
 
-from frappe.utils import (add_days,cint,cstr,flt,getdate,)
+from frappe.utils import (add_days,cint,cstr,flt,getdate,ceil)
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
+from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip as SS
+get_amount_based_on_payment_days = SS.get_amount_based_on_payment_days
+get_future_recurring_additional_amount = SS.get_future_recurring_additional_amount
+
+def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
+	taxable_earnings = 0
+	additional_income = 0
+	additional_income_with_full_tax = 0
+	flexi_benefits = 0
+	amount_exempted_from_income_tax = 0
+	for earning in self.earnings:
+		if based_on_payment_days:
+			amount, additional_amount = self.get_amount_based_on_payment_days(earning)
+		else:
+			if earning.additional_amount:
+				amount, additional_amount = earning.amount, earning.additional_amount
+			else:
+				amount, additional_amount = earning.default_amount, earning.additional_amount
+
+		if earning.is_tax_applicable:
+			if earning.is_flexible_benefit:
+				flexi_benefits += amount
+			else:
+				taxable_earnings += amount - additional_amount
+				additional_income += additional_amount
+				if earning.deduct_full_tax_on_selected_payroll_date:
+					additional_income_with_full_tax += additional_amount
+	if allow_tax_exemption:
+		for ded in self.deductions:
+			if ded.exempted_from_income_tax:
+				amount, additional_amount = ded.amount, ded.additional_amount
+				if based_on_payment_days:
+					amount, additional_amount = self.get_amount_based_on_payment_days(ded)
+
+				taxable_earnings -= flt(amount - additional_amount)
+				additional_income -= additional_amount
+				amount_exempted_from_income_tax = flt(amount - additional_amount)
+
+				if additional_amount and ded.is_recurring_additional_salary:
+					additional_income -= self.get_future_recurring_additional_amount(
+						ded.additional_salary, ded.additional_amount
+					)  # Used ded.additional_amount to consider the amount for the full month
+	return frappe._dict(
+		{
+			"taxable_earnings": taxable_earnings,
+			"additional_income": additional_income,
+			"amount_exempted_from_income_tax": amount_exempted_from_income_tax,
+			"additional_income_with_full_tax": additional_income_with_full_tax,
+			"flexi_benefits": flexi_benefits,
+		}
+	)
 
 
+def compute_current_and_future_taxable_earnings(self):
+	# get taxable_earnings for current period (all days)
+	self.current_taxable_earnings = self.get_taxable_earnings(self.tax_slab.allow_tax_exemption)
+	self.future_structured_taxable_earnings = self.current_taxable_earnings.taxable_earnings * (
+		ceil(self.remaining_sub_periods) - 1
+	)
+
+	current_taxable_earnings_before_exemption = (
+		self.current_taxable_earnings.taxable_earnings
+		+ self.current_taxable_earnings.amount_exempted_from_income_tax
+	)
+	self.future_structured_taxable_earnings_before_exemption = (
+		current_taxable_earnings_before_exemption * (ceil(self.remaining_sub_periods) - 1)
+	)
+
+	# get taxable_earnings, addition_earnings for current actual payment days
+	self.current_taxable_earnings_for_payment_days = self.get_taxable_earnings(
+		self.tax_slab.allow_tax_exemption, based_on_payment_days=1
+	)
+
+	self.current_structured_taxable_earnings = (
+		self.current_taxable_earnings_for_payment_days.taxable_earnings
+	)
+	self.current_structured_taxable_earnings_before_exemption = (
+		self.current_structured_taxable_earnings
+		+ self.current_taxable_earnings_for_payment_days.amount_exempted_from_income_tax
+	)
+
+	self.current_additional_earnings = self.current_taxable_earnings_for_payment_days.additional_income
+	self.current_additional_earnings_with_full_tax = (
+		self.current_taxable_earnings_for_payment_days.additional_income_with_full_tax
+	)
 def calculate_variable_tax(self, tax_component):
 		self.previous_total_paid_taxes = self.get_tax_paid_in_period(
 			self.payroll_period.start_date, self.start_date, tax_component
@@ -81,6 +164,7 @@ def compute_taxable_earnings_for_year(self):
 			+ self.unclaimed_taxable_benefits
 			- self.total_exemption_amount
 		)
+
 		# Total taxable earnings without additional earnings with full tax
 		self.total_taxable_earnings_without_full_tax_addl_components = (
 			self.total_taxable_earnings

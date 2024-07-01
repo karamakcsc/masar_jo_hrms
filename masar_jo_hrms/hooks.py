@@ -307,4 +307,6 @@ from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 SalarySlip.compute_taxable_earnings_for_year = _salary_slip.compute_taxable_earnings_for_year
 SalarySlip.calculate_variable_tax = _salary_slip.calculate_variable_tax
 SalarySlip.calculate_tax_by_tax_slab = _salary_slip.calculate_tax_by_tax_slab
+SalarySlip.compute_current_and_future_taxable_earnings = _salary_slip.compute_current_and_future_taxable_earnings
+SalarySlip.get_taxable_earnings = _salary_slip.get_taxable_earnings
 # # SalarySlip.get_working_days_details = _salary_slip.get_working_days_details
