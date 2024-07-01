@@ -56,7 +56,7 @@ def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=
 
 
 def compute_current_and_future_taxable_earnings(self):
-	# get taxable_earnings for current period (all days)
+	# #get taxable_earnings for current period (all days)
 	self.current_taxable_earnings = self.get_taxable_earnings(self.tax_slab.allow_tax_exemption)
 	self.future_structured_taxable_earnings = self.current_taxable_earnings.taxable_earnings * (
 		ceil(self.remaining_sub_periods) - 1
