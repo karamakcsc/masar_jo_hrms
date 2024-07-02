@@ -278,9 +278,7 @@ fixtures = [
             "Salary Component-custom_is_social_security_applicable" , 
             "Salary Component-custom_is_overtime_applicable" ,  
             "Employee-custom_is_overtime_applicable" , 
-            "Employee-custom_overtime_details" , 
-            "Employee-custom_social_security_amount" , 
-            "Employee-custom_social_security_salary" ,  
+            "Employee-custom_overtime_details" ,  
             "Employee-custom_social_security_date" , 
             "Employee-custom_tax_type" , 
             "Employee-custom_employee_share_rate" , 
@@ -291,7 +289,9 @@ fixtures = [
             "Employee-custom_column_break_idzxg",
             "Employee-custom_national_no",
             "Employee-custom_nationality",
-            "Employee-custom_personal_no"
+            "Employee-custom_personal_no",
+            "Employee-custom_social_security_salary", 
+            "Employee-custom_social_security_amount"
             ]
         ]
     ]}
