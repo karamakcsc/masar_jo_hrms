@@ -310,3 +310,8 @@ SalarySlip.calculate_tax_by_tax_slab = _salary_slip.calculate_tax_by_tax_slab
 SalarySlip.compute_current_and_future_taxable_earnings = _salary_slip.compute_current_and_future_taxable_earnings
 SalarySlip.get_taxable_earnings = _salary_slip.get_taxable_earnings
 # # SalarySlip.get_working_days_details = _salary_slip.get_working_days_details
+
+
+from masar_jo_hrms.override import _payroll_entry
+from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry
+PayrollEntry.create_salary_slips = _payroll_entry.create_salary_slips
