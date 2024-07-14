@@ -1,5 +1,5 @@
 import frappe
-
+from frappe import _
 from frappe.utils import (add_days,cint,cstr,flt,getdate,ceil)
 from hrms.payroll.doctype.salary_slip.salary_slip import eval_tax_slab_condition
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip as SS
@@ -271,13 +271,13 @@ def calculate_tax_by_tax_slab(annual_taxable_earning, tax_slab, eval_globals=Non
 		if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
 			continue
 		if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
-			tax_amount += (annual_taxable_earning - slab.from_amount + 0.001) * slab.percent_deduction * 0.01     #### Mahmoud
+			tax_amount += (annual_taxable_earning - slab.from_amount + 0.01) * slab.percent_deduction * 0.01     #### Mahmoud
 			continue
 
 		if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
-			tax_amount += (annual_taxable_earning - slab.from_amount + 0.001) * slab.percent_deduction * 0.01   #### Mahmoud
+			tax_amount += (annual_taxable_earning - slab.from_amount + 0.01) * slab.percent_deduction * 0.01   #### Mahmoud
 		elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
-			tax_amount += (slab.to_amount - slab.from_amount + 0.001) * slab.percent_deduction * 0.01   #### Mahmoud
+			tax_amount += (slab.to_amount - slab.from_amount + 0.01) * slab.percent_deduction * 0.01   #### Mahmoud
 	# other taxes and charges on income tax 
 	for d in tax_slab.other_taxes_and_charges:
 		if flt(d.min_taxable_income) and flt(d.min_taxable_income) > annual_taxable_earning:

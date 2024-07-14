@@ -24,8 +24,7 @@ def create_salary_slips(self):
                 "payroll_entry": self.name,
                 "exchange_rate": self.exchange_rate,
                 "currency": self.currency,
-            }
-        )
+            })
         if len(employees) > 30 or frappe.flags.enqueue_payroll_entry:
             self.db_set("status", "Queued")
             frappe.enqueue(
@@ -54,7 +53,11 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 		for emp in employees:
 			args.update({"doctype": "Salary Slip", "employee": emp})
 			doc = frappe.get_doc(args).insert()
-			doc.run_method("save")
+			doc.deduct_tax_for_unsubmitted_tax_exemption_proof = not(doc.deduct_tax_for_unsubmitted_tax_exemption_proof)
+			doc.run_method('save')
+			doc.deduct_tax_for_unsubmitted_tax_exemption_proof = not(doc.deduct_tax_for_unsubmitted_tax_exemption_proof)
+			doc.run_method('validate')
+			doc.run_method('save')
 			count += 1
 			if publish_progress:
 				frappe.publish_progress(
@@ -81,3 +84,4 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 		frappe.db.commit()  # nosemgrep
 		frappe.publish_realtime("completed_salary_slip_creation", user=frappe.session.user)
 
+###3
