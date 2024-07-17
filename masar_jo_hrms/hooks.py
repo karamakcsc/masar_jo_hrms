@@ -296,22 +296,6 @@ fixtures = [
         ]
     ]}
 ]
-
-
-
-
-
-from masar_jo_hrms.override import _salary_slip
-from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
-
-SalarySlip.compute_taxable_earnings_for_year = _salary_slip.compute_taxable_earnings_for_year
-SalarySlip.calculate_variable_tax = _salary_slip.calculate_variable_tax
-SalarySlip.calculate_tax_by_tax_slab = _salary_slip.calculate_tax_by_tax_slab
-SalarySlip.compute_current_and_future_taxable_earnings = _salary_slip.compute_current_and_future_taxable_earnings
-SalarySlip.get_taxable_earnings = _salary_slip.get_taxable_earnings
-# # SalarySlip.get_working_days_details = _salary_slip.get_working_days_details
-
-
-from masar_jo_hrms.override import _payroll_entry
-from hrms.payroll.doctype.payroll_entry.payroll_entry import PayrollEntry
-PayrollEntry.create_salary_slips = _payroll_entry.create_salary_slips
+override_doctype_class = {
+    "Salary Slip" : "masar_jo_hrms.override._salary_slip.SalarySlip"
+}
