@@ -29,7 +29,7 @@ def ss_jv(company, name, posting_date, cost_center , ss_liabilities , ss_expense
     from `tabSalary Slip` tss 
     inner join `tabSalary Detail` tsd on tss.name = tsd.parent 
     inner join `tabPayroll Entry` tpe on tpe.name = tss.payroll_entry 
-    where tsd.salary_component = 'Social Security' and tpe.name = %s and tss.docstatus =1
+    where tsd.salary_component = 'Company Social Security' and tpe.name = %s and tss.docstatus =1
     """, (name) , as_dict = True)
     ss_amount= amount_sql[0]['amount']
     ss_calculation = (ss_amount * (company_share_rate/100)) / (employee_share_rate/100)
