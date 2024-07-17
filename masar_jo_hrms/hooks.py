@@ -132,9 +132,9 @@ app_license = "mit"
 # 	}
 # }
 doctype_js = {
-   "Employee" : "custom/employee/employee.js",
-   "Salary Structure Assignment" : "custom/salary_structure_assignment/salary_structure_assignment.js",
-   "Salary Slip" : "custom/salary_slip/salary_slip.js",
+#    "Employee" : "custom/employee/employee.js",
+#    "Salary Structure Assignment" : "custom/salary_structure_assignment/salary_structure_assignment.js",
+#    "Salary Slip" : "custom/salary_slip/salary_slip.js",
    ############## from mahmoud 
    "Payroll Entry" : "custom/payroll_entry/payroll_entry.js", 
  }
