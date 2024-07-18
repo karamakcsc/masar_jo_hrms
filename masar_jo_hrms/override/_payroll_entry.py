@@ -615,7 +615,7 @@ class PayrollEntry(Document):
 
 			if submitted_salary_slips:
 				self.update_salary_slip_status(submitted_salary_slips, jv_name=journal_entry.name)
-            ############################################ Create JV Company Override By Mahoud 
+            ############################################ Create JV Company Override By Mahmoud 
 			ss_company = frappe.db.sql("""  
 							  SELECT 
 							        social_security_liabilities ,   
@@ -630,50 +630,41 @@ class PayrollEntry(Document):
 							        name = %s""" , (self.company) , as_dict = True)
 			ss_liabilities = ss_company[0]['social_security_liabilities']
 			ss_expenses = ss_company[0]['custom_social_security_expenses']
-			company_share_rate = float(ss_company[0]['custom_company_share_rate'])
-			employee_share_rate = float(ss_company[0]['custom_employee_share_rate'])
-			company_share_rate_dangerous = float(ss_company[0]['custom_company_share_rate_dangerous'])
+			ss_cost_center = ss_company[0]['cost_center']
+			if self.cost_center:
+				cost_center = self.cost_center
+			else :
+				cost_center = ss_cost_center
 			amount_sql = frappe.db.sql("""
-                                        select sum(tsd.default_amount) as `amount`
-                                        from `tabSalary Slip` tss 
-                                        inner join `tabSalary Detail` tsd on tss.name = tsd.parent 
-                                        inner join `tabPayroll Entry` tpe on tpe.name = tss.payroll_entry 
-                                        where tsd.salary_component = 'Company Social Security' and tpe.name = %s and tss.docstatus =1
+                                        SELECT SUM(tsd.default_amount) AS `amount`
+                                        FROM `tabSalary Slip` tss
+                                        INNER JOIN `tabSalary Detail` tsd ON tss.name = tsd.parent
+                                        INNER JOIN `tabPayroll Entry` tpe ON tpe.name = tss.payroll_entry
+                                        WHERE tsd.abbr IN ("CSS", "CSSD") AND tpe.name = %s AND tss.docstatus = 1
                                         """, (self.name) , as_dict = True)
 			ss_amount = float(amount_sql[0]['amount'])
 			if not ss_amount:
 				ss_amount = 0  
-			# ss_calculation = (ss_amount * (company_share_rate/100)) / (employee_share_rate/100)
-			amount_sql_dangerous = frappe.db.sql("""
-                                        select sum(tsd.default_amount) as `amount`
-                                        from `tabSalary Slip` tss 
-                                        inner join `tabSalary Detail` tsd on tss.name = tsd.parent 
-                                        inner join `tabPayroll Entry` tpe on tpe.name = tss.payroll_entry 
-                                        where tsd.salary_component = 'Company Social Security Dangerous' and tpe.name = %s and tss.docstatus =1
-                                        """, (self.name) , as_dict = True)
-			ss_amount_dangerous = float(amount_sql_dangerous[0]['amount'])
-			if not ss_amount_dangerous:
-				ss_amount_dangerous = 0
-			# ss_calculation_dangerous = (ss_amount_dangerous * (company_share_rate_dangerous/100)) / (employee_share_rate/100)
-			# social_security_calculation = ss_calculation + ss_calculation_dangerous 
-			social_security_calculation = ss_amount_dangerous + ss_amount
 			jv = frappe.new_doc("Journal Entry")
 			jv.posting_date = self.posting_date
 			jv.company =  self.company
 			jv.cheque_no = self.name
+			jv.cost_center = cost_center
 			jv.cheque_date = self.posting_date
 			jv.user_remark = f"Payroll Entry is:{self.name} in the Posting Date :{self.posting_date}"
 			jv.append("accounts", {
                 "account": ss_expenses,
-                "debit_in_account_currency": social_security_calculation,
+                "debit_in_account_currency": ss_amount,
                 "reference_type" : "Payroll Entry", 
+				"cost_center": cost_center,
                 "reference_name" : self.name , 
                 "reference_due_date" : self.posting_date,
                 "user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
             })
 			jv.append("accounts", {
                 "account": ss_liabilities,
-                "credit_in_account_currency": social_security_calculation,
+                "credit_in_account_currency": ss_amount,
+				"cost_center": cost_center,
                 "reference_type" : "Payroll Entry", 
                 "reference_name" : self.name , 
                 "reference_due_date" : self.posting_date,
