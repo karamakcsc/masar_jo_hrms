@@ -131,13 +131,13 @@ app_license = "mit"
 # 		"on_trash": "method"
 # 	}
 # }
-doctype_js = {
-#    "Employee" : "custom/employee/employee.js",
-#    "Salary Structure Assignment" : "custom/salary_structure_assignment/salary_structure_assignment.js",
-#    "Salary Slip" : "custom/salary_slip/salary_slip.js",
-   ############## from mahmoud 
-   "Payroll Entry" : "custom/payroll_entry/payroll_entry.js", 
- }
+# doctype_js = {
+# #    "Employee" : "custom/employee/employee.js",
+# #    "Salary Structure Assignment" : "custom/salary_structure_assignment/salary_structure_assignment.js",
+# #    "Salary Slip" : "custom/salary_slip/salary_slip.js",
+#    ############## from mahmoud 
+#    "Payroll Entry" : "custom/payroll_entry/payroll_entry.js", 
+#  }
 
 
 # Scheduled Tasks
@@ -291,11 +291,13 @@ fixtures = [
             "Employee-custom_nationality",
             "Employee-custom_personal_no",
             "Employee-custom_social_security_salary", 
-            "Employee-custom_social_security_amount"
+            "Employee-custom_social_security_amount", 
+            "Company-custom_company_share_rate_dangerous"
             ]
         ]
     ]}
 ]
 override_doctype_class = {
-    "Salary Slip" : "masar_jo_hrms.override._salary_slip.SalarySlip"
+    "Salary Slip" : "masar_jo_hrms.override._salary_slip.SalarySlip", 
+    "Payroll Entry" :"masar_jo_hrms.override._payroll_entry.PayrollEntry"
 }
