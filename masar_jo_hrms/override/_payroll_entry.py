@@ -635,17 +635,17 @@ class PayrollEntry(Document):
 				cost_center = self.cost_center
 			else :
 				cost_center = ss_cost_center
-			amount_sql = frappe.db.sql("""
-                                        SELECT SUM(tsd.amount) AS `amount`
-                                        FROM `tabSalary Slip` tss
-                                        INNER JOIN `tabSalary Detail` tsd ON tss.name = tsd.parent
-                                        INNER JOIN `tabPayroll Entry` tpe ON tpe.name = tss.payroll_entry
-                                        WHERE tsd.abbr IN ("CSS", "CSSD") AND tpe.name = %s 
-                                        """, (self.name) , as_dict = True)
-			ss_amount = float(amount_sql[0]['amount'])
-			# frappe.throw(str(ss_amount))
-			if not ss_amount:
-				ss_amount = 0  
+			credits_sql = frappe.db.sql("""
+				SELECT (tsd.amount) AS `amount`, te.payroll_cost_center, tecc.cost_center , te.name as `emp_no`
+				FROM `tabSalary Slip` tss
+				INNER JOIN `tabSalary Detail` tsd ON tss.name = tsd.parent
+				INNER JOIN `tabPayroll Entry` tpe ON tpe.name = tss.payroll_entry
+				INNER JOIN tabEmployee te ON tss.employee  = te.name
+				INNER JOIN `tabSalary Structure Assignment` tssa ON te.name = tssa.employee 
+				LEFT JOIN `tabEmployee Cost Center` tecc ON tecc.parent  = tssa.name
+				WHERE tsd.abbr IN ("CSS", "CSSD") AND tpe.name = %s
+				GROUP BY te.name
+			""", (self.name,), as_dict=True)
 			jv = frappe.new_doc("Journal Entry")
 			jv.posting_date = self.posting_date
 			jv.company =  self.company
@@ -653,24 +653,31 @@ class PayrollEntry(Document):
 			jv.cost_center = cost_center
 			jv.cheque_date = self.posting_date
 			jv.user_remark = f"Payroll Entry is:{self.name} in the Posting Date :{self.posting_date}"
+			amount_debit = 0 
+			for credit in credits_sql: 
+				amount_debit += credit['amount']
+				jv.append("accounts", {
+                "account": ss_liabilities,
+                "credit_in_account_currency": credit['amount'],
+				"cost_center": credit['payroll_cost_center'],
+				"party_type" : "Employee",
+				"party": credit['emp_no'],
+                "reference_type" : "Payroll Entry", 
+                "reference_name" : self.name , 
+                "reference_due_date" : self.posting_date,
+                "user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
+            	})
+
 			jv.append("accounts", {
                 "account": ss_expenses,
-                "debit_in_account_currency": ss_amount,
+                "debit_in_account_currency": amount_debit,
                 "reference_type" : "Payroll Entry", 
 				"cost_center": cost_center,
                 "reference_name" : self.name , 
                 "reference_due_date" : self.posting_date,
                 "user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
             })
-			jv.append("accounts", {
-                "account": ss_liabilities,
-                "credit_in_account_currency": ss_amount,
-				"cost_center": cost_center,
-                "reference_type" : "Payroll Entry", 
-                "reference_name" : self.name , 
-                "reference_due_date" : self.posting_date,
-                "user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
-            })
+			
 			jv.save(ignore_permissions=True)
 			jv.submit()
 			
