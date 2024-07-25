@@ -631,24 +631,21 @@ class PayrollEntry(Document):
 			ss_liabilities = ss_company[0]['social_security_liabilities']
 			ss_expenses = ss_company[0]['custom_social_security_expenses']
 			ss_cost_center = ss_company[0]['cost_center']
-			company_share_rate = float(ss_company[0]['custom_company_share_rate'])
-			employee_share_rate = float(ss_company[0]['custom_employee_share_rate'])
-			company_share_rate_dangerous = float(ss_company[0]['custom_company_share_rate_dangerous'])
-			query = """
-				SELECT SUM(tsd.default_amount) AS `amount`
-				FROM `tabSalary Slip` tss
-				INNER JOIN `tabSalary Detail` tsd ON tss.name = tsd.parent
-				INNER JOIN `tabPayroll Entry` tpe ON tpe.name = tss.payroll_entry
-				WHERE tsd.abbr IN (%s) AND tpe.name = %s AND tss.docstatus = 1
-			"""
-			cost_center = self.cost_center or ss_cost_center
-			params_css = ("CSS", self.name)
-			params_cssd = ("CSSD", self.name)
-			amount_css = frappe.db.sql(query, params_css, as_dict=True)
-			amount_cssd = frappe.db.sql(query, params_cssd, as_dict=True)
-			ss_amount_css = (float(amount_css[0]['amount']) * employee_share_rate / company_share_rate) or 0
-			ss_amount_cssd = (float(amount_cssd[0]['amount']) * employee_share_rate / company_share_rate_dangerous) or 0
-			ss_amount = ss_amount_css + ss_amount_cssd
+			if self.cost_center:
+				cost_center = self.cost_center
+			else :
+				cost_center = ss_cost_center
+			amount_sql = frappe.db.sql("""
+                                        SELECT SUM(tsd.amount) AS `amount`
+                                        FROM `tabSalary Slip` tss
+                                        INNER JOIN `tabSalary Detail` tsd ON tss.name = tsd.parent
+                                        INNER JOIN `tabPayroll Entry` tpe ON tpe.name = tss.payroll_entry
+                                        WHERE tsd.abbr IN ("CSS", "CSSD") AND tpe.name = %s 
+                                        """, (self.name) , as_dict = True)
+			ss_amount = float(amount_sql[0]['amount'])
+			# frappe.throw(str(ss_amount))
+			if not ss_amount:
+				ss_amount = 0  
 			jv = frappe.new_doc("Journal Entry")
 			jv.posting_date = self.posting_date
 			jv.company =  self.company
