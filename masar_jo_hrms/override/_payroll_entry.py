@@ -616,6 +616,11 @@ class PayrollEntry(Document):
 			if submitted_salary_slips:
 				self.update_salary_slip_status(submitted_salary_slips, jv_name=journal_entry.name)
             ############################################ Create JV Company Override By Mahmoud 
+
+
+			"""
+			Create a Journal Entry for the given payroll entry.
+			"""
 			ss_company = frappe.db.sql("""  
 							  SELECT 
 							        social_security_liabilities ,   
@@ -635,6 +640,7 @@ class PayrollEntry(Document):
 				cost_center = self.cost_center
 			else :
 				cost_center = ss_cost_center
+
 			credits_sql = frappe.db.sql("""
 				SELECT (tsd.amount) AS `amount`, te.payroll_cost_center, tecc.cost_center , te.name as `emp_no`
 				FROM `tabSalary Slip` tss
@@ -679,8 +685,59 @@ class PayrollEntry(Document):
             })
 			
 			jv.save(ignore_permissions=True)
-			jv.submit()
+			# jv.submit(ignore_permissions=True)
+			company_jv_sql = frappe.db.sql("""
+				SELECT sum(tsd.amount) AS `amount`  , te.payroll_cost_center 
+				FROM `tabSalary Slip` tss
+				INNER JOIN `tabSalary Detail` tsd ON tss.name = tsd.parent
+				INNER JOIN `tabPayroll Entry` tpe ON tpe.name = tss.payroll_entry
+				LEFT JOIN tabEmployee te ON tss.employee  = te.name
+				WHERE tsd.abbr IN ("CSS", "CSSD") AND tpe.name = %s
+				GROUP By te.payroll_cost_center 
+			""", (self.name,), as_dict=True)
 			
+			
+			# """
+			# Create a company Journal Entry for the given payroll entry.
+			# """
+			company_jv = frappe.new_doc("Journal Entry")
+			company_jv.posting_date = self.posting_date
+			company_jv.company =  self.company
+			company_jv.cheque_no = self.name
+			company_jv.cost_center = cost_center
+			company_jv.cheque_date = self.posting_date
+			company_jv.user_remark = f"Payroll Entry is:{self.name} in the Posting Date :{self.posting_date}"
+
+			credit_amount = 0
+			for debit in company_jv_sql:
+				credit_amount += debit['amount']
+				company_jv.append("accounts", {
+					"account": ss_liabilities,
+					"credit_in_account_currency": debit['amount'],
+					"cost_center": debit['payroll_cost_center'],
+					"reference_type" : "Payroll Entry", 
+					"reference_name" : self.name , 
+					"reference_due_date" : self.posting_date,
+					"user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
+				})
+
+			company_jv.append("accounts", {
+				"account": ss_expenses,
+				"debit_in_account_currency": credit_amount,
+				"reference_type" : "Payroll Entry", 
+				"cost_center": cost_center,
+				"reference_name" : self.name , 
+				"reference_due_date" : self.posting_date,
+				"user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
+			})
+
+			try:
+				jv.submit()
+				company_jv.save(ignore_permissions=True)
+				company_jv.submit()
+			except Exception as e:
+				frappe.log_error("Error creating company journal entry: {}".format(e))
+
             #########################################################################
 		except Exception as e:
 			if type(e) in (str, list, tuple):
