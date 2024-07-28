@@ -713,7 +713,7 @@ class PayrollEntry(Document):
 				credit_amount += debit['amount']
 				company_jv.append("accounts", {
 					"account": ss_liabilities,
-					"credit_in_account_currency": debit['amount'],
+					"debit_in_account_currency": debit['amount'],
 					"cost_center": debit['payroll_cost_center'],
 					"reference_type" : "Payroll Entry", 
 					"reference_name" : self.name , 
@@ -723,7 +723,7 @@ class PayrollEntry(Document):
 
 			company_jv.append("accounts", {
 				"account": ss_expenses,
-				"debit_in_account_currency": credit_amount,
+				"credit_in_account_currency": credit_amount,
 				"reference_type" : "Payroll Entry", 
 				"cost_center": cost_center,
 				"reference_name" : self.name , 
