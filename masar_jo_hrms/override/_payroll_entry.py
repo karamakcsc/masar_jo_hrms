@@ -738,7 +738,7 @@ class PayrollEntry(Document):
 			except Exception as e:
 				frappe.log_error("Error creating company journal entry: {}".format(e))
 
-            #########################################################################
+            ############################################################################
 		except Exception as e:
 			if type(e) in (str, list, tuple):
 				frappe.msgprint(e)
