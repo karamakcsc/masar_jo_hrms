@@ -693,13 +693,8 @@ class PayrollEntry(Document):
                 "reference_due_date" : self.posting_date,
                 "user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
             })
-			
 			jv.save(ignore_permissions=True)
-			try:
-				jv.submit()
-			except Exception as e:
-				frappe.log_error("Error creating company journal entry: {}".format(e))
-
+			jv.submit()
             ############################################################################
 		except Exception as e:
 			if type(e) in (str, list, tuple):
