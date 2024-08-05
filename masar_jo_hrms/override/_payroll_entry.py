@@ -677,34 +677,48 @@ class PayrollEntry(Document):
 			jv.user_remark = f"Payroll Entry is:{self.name} in the Posting Date :{self.posting_date}"
 			amount_debit = 0 
 			for credit in credits_sql: 
-				if credit['custom_is_hazard'] == 0 :
-					credit_in_account_currency = round(((credit['amount'] /employee_share_rate) * company_share_rate) , 3 )
-				elif credit['custom_is_hazard'] == 1 :
-					credit_in_account_currency = round(((credit['amount'] /employee_share_rate) * company_share_rate_dangerous) , 3)
-				amount_debit += credit_in_account_currency
+				if credits_sql['amount'] and credits_sql['payroll_cost_center']:
+					if credit['custom_is_hazard'] == 0 :
+						credit_in_account_currency = round(((credit['amount'] /employee_share_rate) * company_share_rate) , 3 )
+					elif credit['custom_is_hazard'] == 1 :
+						credit_in_account_currency = round(((credit['amount'] /employee_share_rate) * company_share_rate_dangerous) , 3)
+					amount_debit += credit_in_account_currency
+					jv.append("accounts", {
+					"account": ss_liabilities,
+					"credit_in_account_currency":credit_in_account_currency,
+					"cost_center": credit['payroll_cost_center'],
+					"party_type" : "Employee",
+					"party": credit['emp_no'],
+					"reference_type" : "Payroll Entry", 
+					"reference_name" : self.name , 
+					"reference_due_date" : self.posting_date,
+					"user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
+					})
+				else:
+					frappe.msgprint(
+						_(f"Employee {credit['emp_no']} has no Social Security in the Salary Structure."),
+						alert=True,
+						indicator="blue",
+					)
+			if amount_debit != 0:
 				jv.append("accounts", {
-                "account": ss_liabilities,
-                "credit_in_account_currency":credit_in_account_currency,
-				"cost_center": credit['payroll_cost_center'],
-				"party_type" : "Employee",
-				"party": credit['emp_no'],
-                "reference_type" : "Payroll Entry", 
-                "reference_name" : self.name , 
-                "reference_due_date" : self.posting_date,
-                "user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
-            	})
+					"account": ss_expenses,
+					"debit_in_account_currency": amount_debit,
+					"reference_type" : "Payroll Entry", 
+					"cost_center": cost_center,
+					"reference_name" : self.name , 
+					"reference_due_date" : self.posting_date,
+					"user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
+				})
+				jv.save(ignore_permissions=True)
+				jv.submit()
+			else:
+				frappe.msgprint(
+					_("There is no employee with Social Security. Company Journal Entry not created."),
+					alert=True,
+					indicator="blue",
+				)
 
-			jv.append("accounts", {
-                "account": ss_expenses,
-                "debit_in_account_currency": amount_debit,
-                "reference_type" : "Payroll Entry", 
-				"cost_center": cost_center,
-                "reference_name" : self.name , 
-                "reference_due_date" : self.posting_date,
-                "user_remark": f"reference type is Payroll Entry , Reference Name is {self.name} and Reference Due Date is :{self.posting_date} "
-            })
-			jv.save(ignore_permissions=True)
-			jv.submit()
             ############################################################################
 		except Exception as e:
 			if type(e) in (str, list, tuple):
