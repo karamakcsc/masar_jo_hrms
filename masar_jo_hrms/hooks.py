@@ -275,6 +275,7 @@ fixtures = [
             "Company-custom_company_share_rate" , 
             "Company-custom_social_security_info" ,
             "Company-custom_masar_hrms",
+            "Company-custom_company_share_rate_dangerous",
             "Salary Component-custom_is_social_security_applicable" , 
             "Salary Component-custom_is_overtime_applicable" ,  
             "Employee-custom_is_overtime_applicable" , 
@@ -292,7 +293,6 @@ fixtures = [
             "Employee-custom_personal_no",
             "Employee-custom_social_security_salary", 
             "Employee-custom_social_security_amount", 
-            "Company-custom_company_share_rate_dangerous",
             "Employee-custom_is_hazard"
             ]
         ]

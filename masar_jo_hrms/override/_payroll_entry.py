@@ -677,7 +677,7 @@ class PayrollEntry(Document):
 			jv.user_remark = f"Payroll Entry is:{self.name} in the Posting Date :{self.posting_date}"
 			amount_debit = 0 
 			for credit in credits_sql: 
-				if credits_sql['amount'] and credits_sql['payroll_cost_center']:
+				if credit['amount'] and credit['payroll_cost_center']:
 					if credit['custom_is_hazard'] == 0 :
 						credit_in_account_currency = round(((credit['amount'] /employee_share_rate) * company_share_rate) , 3 )
 					elif credit['custom_is_hazard'] == 1 :
