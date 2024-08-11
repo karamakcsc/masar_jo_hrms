@@ -625,10 +625,11 @@ class PayrollEntry(Document):
 
 			if submitted_salary_slips:
 				self.set_journal_entry_in_salary_slips(submitted_salary_slips, jv_name=journal_entry.name)
-			############################################ Create JV Company Override By Mahmoud 
+			######################################### Override By Mahmoud (Company JV)
 			"""
 			Create a Journal Entry for the given payroll entry.
 			"""
+			
 			ss_company = frappe.db.sql("""  
 							  SELECT 
 							        social_security_liabilities ,   
@@ -649,9 +650,6 @@ class PayrollEntry(Document):
 				ss_liabilities = ss_company[0]['social_security_liabilities']
 				ss_expenses = ss_company[0]['custom_social_security_expenses']
 				ss_cost_center = ss_company[0]['cost_center']
-				company_share_rate = float(ss_company[0]['custom_company_share_rate'])
-				employee_share_rate = float(ss_company[0]['custom_employee_share_rate'])
-				company_share_rate_dangerous = float(ss_company[0]['custom_company_share_rate_dangerous'])
 			else: 
 				frappe.throw("Plase check Masar HRMS details in Company.")
 			if self.cost_center:
@@ -659,15 +657,27 @@ class PayrollEntry(Document):
 			else :
 				cost_center = ss_cost_center
 
-			credits_sql = frappe.db.sql("""
-				SELECT (tsd.amount) AS `amount`, te.payroll_cost_center, te.name as `emp_no` , te.custom_is_hazard 
-				FROM `tabSalary Slip` tss 
-				INNER JOIN `tabSalary Detail` tsd ON tsd.parent =tss.name 
+			jv_sql = frappe.db.sql("""SELECT 
+				COALESCE(te.payroll_cost_center, td.payroll_cost_center) AS payroll_cost_center,
+				SUM(
+					CASE 
+					WHEN te.custom_is_hazard = 0 THEN 
+						(tsd.amount / tc.custom_employee_share_rate) * tc.custom_company_share_rate
+					ELSE 
+						(tsd.amount / tc.custom_employee_share_rate) * tc.custom_company_share_rate_dangerous
+					END
+				) AS total_amount
+				FROM 
+				`tabSalary Slip` tss 
+				INNER JOIN `tabSalary Detail` tsd ON tsd.parent = tss.name 
 				INNER JOIN tabEmployee te ON tss.employee  = te.name
 				INNER JOIN `tabPayroll Entry` tpe ON tpe.name = tss.payroll_entry
-				WHERE tsd.abbr = "SS"  AND tpe.name = %s
-				GROUP BY te.name	
-			""", (self.name,), as_dict=True)
+				LEFT JOIN tabDepartment td ON td.name = te.department
+				INNER JOIN `tabCompany` tc ON tc.name = tpe.company
+				WHERE 
+				tsd.abbr = "SS"  AND tpe.name = %s
+				GROUP BY 
+				te.payroll_cost_center """ , (self.name) , as_dict = True )
 			jv = frappe.new_doc("Journal Entry")
 			jv.posting_date = self.posting_date
 			jv.company =  self.company
@@ -676,19 +686,15 @@ class PayrollEntry(Document):
 			jv.cheque_date = self.posting_date
 			jv.user_remark = f"Payroll Entry is:{self.name} in the Posting Date :{self.posting_date}"
 			amount_debit = 0 
-			for credit in credits_sql: 
-				if credit['amount'] and credit['payroll_cost_center']:
-					if credit['custom_is_hazard'] == 0 :
-						credit_in_account_currency = round(((credit['amount'] /employee_share_rate) * company_share_rate) , 3 )
-					elif credit['custom_is_hazard'] == 1 :
-						credit_in_account_currency = round(((credit['amount'] /employee_share_rate) * company_share_rate_dangerous) , 3)
-					amount_debit += credit_in_account_currency
+			for credit in jv_sql: 
+				if credit['total_amount']:
+					amount_debit += credit['total_amount']
 					jv.append("accounts", {
 					"account": ss_liabilities,
-					"credit_in_account_currency":credit_in_account_currency,
+					"credit_in_account_currency":credit['total_amount'],
 					"cost_center": credit['payroll_cost_center'],
-					"party_type" : "Employee",
-					"party": credit['emp_no'],
+					# "party_type" : "Employee",
+					# "party": credit['emp_no'],
 					"reference_type" : "Payroll Entry", 
 					"reference_name" : self.name , 
 					"reference_due_date" : self.posting_date,
