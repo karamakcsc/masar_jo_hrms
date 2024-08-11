@@ -688,10 +688,10 @@ class PayrollEntry(Document):
 			amount_debit = 0 
 			for credit in jv_sql: 
 				if credit['total_amount']:
-					amount_debit += credit['total_amount']
+					amount_debit += round(credit['total_amount'] , 3)
 					jv.append("accounts", {
 					"account": ss_liabilities,
-					"credit_in_account_currency":credit['total_amount'],
+					"credit_in_account_currency": round(credit['total_amount'],3 ), 
 					"cost_center": credit['payroll_cost_center'],
 					# "party_type" : "Employee",
 					# "party": credit['emp_no'],
