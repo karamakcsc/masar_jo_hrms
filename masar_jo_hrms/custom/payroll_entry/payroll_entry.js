@@ -22,4 +22,4 @@
 //       frm.toggle_display('Social Security JV', frm.doc.docstatus != 0 && frm.doc.docstatus != 2);
 //     },
 //   });
-  
+  ////////
