@@ -675,7 +675,7 @@ class PayrollEntry(Document):
 				LEFT JOIN tabDepartment td ON td.name = te.department
 				INNER JOIN `tabCompany` tc ON tc.name = tpe.company
 				WHERE 
-				tsd.abbr = "SS"  AND tpe.name = %s
+				tsd.abbr = "SS"   AND te.is_social_security_applicable = 1 AND tpe.name = %s
 				GROUP BY 
 				te.payroll_cost_center """ , (self.name) , as_dict = True )
 			jv = frappe.new_doc("Journal Entry")
